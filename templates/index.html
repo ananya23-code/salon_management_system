@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon Management System</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="app-layout">
+    <aside class="sidebar">
+        <a href="{{ url_for('dashboard') }}" class="brand">
+            <span class="brand-icon">✦</span>
+            <span>
+                <strong>Velvet Salon</strong>
+                <small>MANAGEMENT STUDIO</small>
+            </span>
+        </a>
+
+        <p class="nav-heading">WORKSPACE</p>
+        <nav class="nav-links">
+            <a class="nav-link active" href="#dashboard">▦ <span>Dashboard</span></a>
+            <a class="nav-link" href="#customer-form">♙ <span>Customers</span></a>
+            <a class="nav-link" href="#appointment-form">▣ <span>Appointments</span></a>
+            <a class="nav-link" href="#services">✧ <span>Salon Services</span></a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="mini-profile">
+                <div class="avatar">VS</div>
+                <div>
+                    <strong>Salon Admin</strong>
+                    <small>Management Panel</small>
+                </div>
+            </div>
+            <p class="sidebar-note">Beauty, care &amp; confidence.</p>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">SALON MANAGEMENT</p>
+                <h1>Dashboard</h1>
+                <p class="muted">Welcome back! Here's what's happening at your salon.</p>
+            </div>
+            <a class="topbar-button" href="#appointment-form">＋ New appointment</a>
+        </header>
+
+        <section id="dashboard" class="page-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Overview</h2>
+                    <p class="muted">Your salon at a glance</p>
+                </div>
+                <span class="live-label"><span></span> Database connected</span>
+            </div>
+
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon lilac">♙</span>
+                        <span class="stat-label">CUSTOMERS</span>
+                    </div>
+                    <p class="stat-number">{{ counts.customers }}</p>
+                    <p class="stat-caption">Registered customers</p>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon peach">✂</span>
+                        <span class="stat-label">EMPLOYEES</span>
+                    </div>
+                    <p class="stat-number">{{ counts.employees }}</p>
+                    <p class="stat-caption">Salon team members</p>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon mint">✧</span>
+                        <span class="stat-label">SERVICES</span>
+                    </div>
+                    <p class="stat-number">{{ counts.services }}</p>
+                    <p class="stat-caption">Services available</p>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon blue">▣</span>
+                        <span class="stat-label">APPOINTMENTS</span>
+                    </div>
+                    <p class="stat-number">{{ counts.appointments }}</p>
+                    <p class="stat-caption">Total bookings</p>
+                </article>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <section class="forms-grid page-section">
+            <article id="customer-form" class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <span class="panel-kicker">CUSTOMER DIRECTORY</span>
+                        <h2>Register a customer</h2>
+                        <p class="muted">Add a new customer to your salon.</p>
+                    </div>
+                    <span class="heading-icon">♙</span>
+                </div>
+
+                <form action="{{ url_for('add_customer') }}" method="POST">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="full_name">Full name *</label>
+                            <input id="full_name" name="full_name"
+                                   placeholder="Enter customer name" required>
+                        </div>
+                        <div class="field">
+                            <label for="phone">Phone number *</label>
+                            <input id="phone" name="phone" type="tel"
+                                   placeholder="Enter phone number" required>
+                        </div>
+                        <div class="field">
+                            <label for="email">Email address</label>
+                            <input id="email" name="email" type="email"
+                                   placeholder="name@example.com">
+                        </div>
+                        <div class="field">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender">
+                                <option value="">Prefer not to say</option>
+                                <option value="Female">Female</option>
+                                <option value="Male">Male</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="primary-button" type="submit">＋ Register customer</button>
+                </form>
+            </article>
+
+            <article id="appointment-form" class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <span class="panel-kicker">SCHEDULE A VISIT</span>
+                        <h2>Book an appointment</h2>
+                        <p class="muted">Choose a customer, service and time.</p>
+                    </div>
+                    <span class="heading-icon">▣</span>
+                </div>
+
+                <form action="{{ url_for('add_appointment') }}" method="POST">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="customer_id">Customer *</label>
+                            <select id="customer_id" name="customer_id" required>
+                                <option value="">Select customer</option>
+                                {% for customer in customers %}
+                                    <option value="{{ customer.customer_id }}">
+                                        {{ customer.full_name }} · {{ customer.phone }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="employee_id">Employee *</label>
+                            <select id="employee_id" name="employee_id" required>
+                                <option value="">Select employee</option>
+                                {% for employee in employees %}
+                                    <option value="{{ employee.employee_id }}">
+                                        {{ employee.full_name }} — {{ employee.job_role }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="service_id">Service *</label>
+                            <select id="service_id" name="service_id" required>
+                                <option value="">Select service</option>
+                                {% for service in services %}
+                                    <option value="{{ service.service_id }}">
+                                        {{ service.service_name }} — ₹{{ "%.2f"|format(service.price) }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="appointment_date">Date *</label>
+                            <input id="appointment_date" name="appointment_date"
+                                   type="date" required>
+                        </div>
+                        <div class="field">
+                            <label for="appointment_time">Time *</label>
+                            <input id="appointment_time" name="appointment_time"
+                                   type="time" required>
+                        </div>
+                    </div>
+                    <button class="primary-button" type="submit">＋ Book appointment</button>
+                </form>
+            </article>
+        </section>
+
+        <section id="appointments" class="panel page-section">
+            <div class="panel-heading appointments-heading">
+                <div>
+                    <span class="panel-kicker">BOOKING SCHEDULE</span>
+                    <h2>Appointment management</h2>
+                    <p class="muted">Search bookings and narrow results using filters.</p>
+                </div>
+                <span class="result-count">{{ appointments|length }} shown</span>
+            </div>
+
+            <form action="{{ url_for('dashboard') }}#appointments"
+                  method="GET" class="filter-form">
+                <div class="field search-field">
+                    <label for="search">Search</label>
+                    <input id="search" name="search" value="{{ search }}"
+                           placeholder="Customer, phone, employee or service">
+                </div>
+                <div class="field">
+                    <label for="date">Appointment date</label>
+                    <input id="date" name="date" type="date" value="{{ date_filter }}">
+                </div>
+                <div class="field">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="">All statuses</option>
+                        {% for status in ["Booked", "Completed", "Cancelled"] %}
+                            <option value="{{ status }}"
+                                {% if status_filter == status %}selected{% endif %}>
+                                {{ status }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="filter_service">Service</label>
+                    <select id="filter_service" name="service_id">
+                        <option value="">All services</option>
+                        {% for service in services %}
+                            <option value="{{ service.service_id }}"
+                                {% if service_filter == service.service_id|string %}selected{% endif %}>
+                                {{ service.service_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button class="primary-button" type="submit">Apply filters</button>
+                    <a class="reset-button" href="{{ url_for('dashboard') }}#appointments">Reset</a>
+                </div>
+            </form>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Employee</th>
+                            <th>Date &amp; time</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                            <tr>
+                                <td><span class="id-pill">#{{ appointment.appointment_id }}</span></td>
+                                <td>
+                                    <strong>{{ appointment.customer_name }}</strong>
+                                    <small class="table-subtext">{{ appointment.customer_phone }}</small>
+                                </td>
+                                <td>{{ appointment.service_name }}</td>
+                                <td>{{ appointment.employee_name }}</td>
+                                <td>
+                                    <strong>{{ appointment.appointment_date }}</strong>
+                                    <small class="table-subtext">{{ appointment.appointment_time }}</small>
+                                </td>
+                                <td>₹{{ "%.2f"|format(appointment.price) }}</td>
+                                <td>
+                                    <span class="status-badge {{ appointment.status|lower }}">
+                                        {{ appointment.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <span>⌕</span>
+                                    <strong>No appointments found</strong>
+                                    <p>Try changing your search or filters.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="table-footnote">Showing up to 100 matching appointments.</p>
+        </section>
+
+        <section id="services" class="page-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Available salon services</h2>
+                    <p class="muted">Explore the treatments offered at your salon.</p>
+                </div>
+                <span class="result-count">{{ services|length }} services</span>
+            </div>
+
+            <div class="services-grid">
+                {% for service in services %}
+                    <article class="service-card">
+                        <div class="service-symbol">✧</div>
+                        <h3>{{ service.service_name }}</h3>
+                        <p class="service-description">
+                            {{ service.description or "Professional salon care tailored for you." }}
+                        </p>
+                        <div class="service-bottom">
+                            <span>◷ {{ service.duration_minutes }} min</span>
+                            <strong>₹{{ "%.2f"|format(service.price) }}</strong>
+                        </div>
+                    </article>
+                {% else %}
+                    <p class="muted">No services have been added yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <footer class="footer">
+            <span>✦ Velvet Salon Management</span>
+            <span>Flask · MySQL · Built for better salon care</span>
+        </footer>
+    </main>
+</div>
+
+<script>
+    // Prevent booking appointments for dates before today.
+    const dateInput = document.getElementById("appointment_date");
+    if (dateInput) {
+        const today = new Date();
+        const localDate = new Date(
+            today.getTime() - today.getTimezoneOffset() * 60000
+        ).toISOString().slice(0, 10);
+        dateInput.min = localDate;
+    }
+</script>
+</body>
+</html>
