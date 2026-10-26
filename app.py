@@ -6,14 +6,14 @@ from mysql.connector import Error
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "local-development-key")
-
 DB_CONFIG = {
     "host": os.environ.get("DB_HOST", "localhost"),
     "port": int(os.environ.get("DB_PORT", "3306")),
     "user": os.environ.get("DB_USER", "root"),
-    "password": os.environ.get("DB_PASSWORD", ""),
+    "password": os.environ.get("DB_SECRET", ""),
     "database": os.environ.get("DB_NAME", "salon_management"),
-    "ssl_disabled": False
+    "ssl_disabled": False,
+    "connection_timeout": 15
 }
 
 
